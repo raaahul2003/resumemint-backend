@@ -78,16 +78,23 @@ async function callGemini(systemPrompt, userText, base64Data, mimeType) {
 
   const parts = [];
   if (base64Data && mimeType) {
+    // Validate size — Gemini inline_data max is ~20MB base64
+    if (base64Data.length > 15000000) throw new Error("File too large for AI processing. Please use a smaller file.");
     parts.push({ inline_data: { mime_type: mimeType, data: base64Data } });
   }
   parts.push({ text: systemPrompt + "\n\n" + userText });
 
+  // Use v1 API with gemini-1.5-flash-latest (stable, free)
   const result = await httpsPost(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
     { "Content-Type": "application/json" },
     {
-      contents: [{ parts }],
-      generationConfig: { temperature: 0.3, maxOutputTokens: 2048 }
+      contents: [{ role: "user", parts }],
+      generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
+      safetySettings: [
+        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" }
+      ]
     }
   );
 
