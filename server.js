@@ -86,8 +86,8 @@ async function callGemini(systemPrompt, userText, base64Data, mimeType) {
 
   // Use v1 API with gemini-1.5-flash-latest (stable, free)
   const result = await httpsPost(
-    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
-    { "Content-Type": "application/json" },
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    { "Content-Type": "application/json", "x-goog-api-key": apiKey },
     {
       contents: [{ role: "user", parts }],
       generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
